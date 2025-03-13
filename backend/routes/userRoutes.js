@@ -1,16 +1,28 @@
-const express = require('express');
-const { registerUser, loginUser, getUserProfile } = require('../controllers/userController');
-const { protect } = require('../middlewares/authMiddleware');
+import express from "express";
+import UserController from "../controllers/userController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
-const router = express.Router();
+export default class UserRoutes {
+  router = express.Router();
+  userController = new UserController();
 
-// Public routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+  constructor() {
+    this.initializeRoutes();
+  }
 
-// Protected routes
-router.get('/profile', protect, getUserProfile);
+  initializeRoutes() {
+    // Public routes
+    this.router.post("/register", this.userController.registerUser.bind(this.userController));
+    this.router.post("/login", this.userController.loginUser.bind(this.userController));
+    this.router.post("/password-reset-request", this.userController.requestPasswordReset.bind(this.userController));
+    this.router.post("/password-reset/:resetToken", this.userController.resetPassword.bind(this.userController));
 
-// TODO: Add routes for updating user profile and resetting password
+    // Protected routes
+    this.router.get("/profile/:id", protect, this.userController.getUserProfile.bind(this.userController));
+    this.router.put("/profile/:id", protect, this.userController.updateUser.bind(this.userController));
+  }
 
-module.exports = router;
+  getRouter() {
+    return this.router;
+  }
+}

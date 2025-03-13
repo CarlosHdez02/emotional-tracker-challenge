@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const User = require('../models/userModel');
-const Emotion = require('../models/emotionModel');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import User from '../models/userModel.js';
+import Emotion from '../models/emotionModel.js';
 
 // Configuración de la conexión a MongoDB
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/emotionaltracker';
+const MONGO_URI = process.env.MONGO_URI;
 
 // Usuarios de prueba
 const users = [
@@ -96,4 +96,4 @@ const seedDatabase = async () => {
 };
 
 // Ejecutar el seeder
-seedDatabase(); 
+seedDatabase();
