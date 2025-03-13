@@ -1,13 +1,16 @@
 import { NotFoundError, ValidationError } from "../middlewares/errorMiddleware.js";
 import Emotion from "../models/emotionModel.js";
+import mongoose from "mongoose";
 
 export default class EmotionService {
-  async getUserEmotions(userId) {
+  async getUserEmotions(query) {
     try {
-      const emotions = await Emotion.find(userId);
+
+      const emotions = await Emotion.find(query);
       return emotions;
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching user emotions:", err);
+      throw err;
     }
   }
 
@@ -19,37 +22,52 @@ export default class EmotionService {
       }
       return emotion;
     } catch (err) {
-      console.error(err);
+      throw err;
     }
   }
   async createEmotion(emotionData) {
     try {
-      const existingEmotion = await Emotion.findOne({emoion: emotionData.emotion})
-      if(existingEmotion) throw new ValidationError("An emotion with that name is already registered")
       const newEmotion = await Emotion.create(emotionData);
       return newEmotion;
     } catch (err) {
-      console.error(err);
+      console.error("Error creating emotion:", err);
+      
+      // Handle specific MongoDB/Mongoose errors
+      if (err.name === 'ValidationError') {
+        throw new ValidationError(err.message);
+      }
+      throw err;
     }
   }
 
   async updateEmotion(emotionId, emotionData) {
-    const emotionRecord = await Emotion.findById(emotionId);
-
-    if (!emotionRecord) {
-      throw new NotFoundError("There is no emotion with that id in database");
+    try {
+      const emotionRecord = await Emotion.findById(emotionId);
+      
+      if (!emotionRecord) {
+        throw new NotFoundError("There is no emotion with that id in database");
+      }
+      
+      Object.assign(emotionRecord, emotionData);
+      const updatedEmotion = await emotionRecord.save();
+      return updatedEmotion;
+    } catch (err) {
+      console.error("Error updating emotion:", err);
+      throw err;
     }
-    Object.assign(emotionRecord, emotionData);
-
-    const updatedEmotion = await emotionRecord.save();
-
-    return updatedEmotion;
   }
+
   async getEmotionSummary(userId) {
     try {
+      const userObjectId = mongoose.Types.ObjectId.isValid(userId) 
+        ? new mongoose.Types.ObjectId(userId) 
+        : userId;
+      
+      console.log('Getting emotions summary for user:', userId);
+      console.log('Converted ObjectId:', userObjectId);
+      
       const aggregationResult = await Emotion.aggregate([
-        { $match: { user: userId } },
-
+        { $match: { user: userObjectId } },
         {
           $group: {
             _id: null,
@@ -58,7 +76,6 @@ export default class EmotionService {
             emotions: { $push: "$emotion" },
           },
         },
-
         {
           $project: {
             _id: 0,
@@ -74,21 +91,20 @@ export default class EmotionService {
           },
         },
       ]);
-
+      
       const emotionCounts = {};
-
+      
       if (aggregationResult.length > 0 && aggregationResult[0].emotions) {
         aggregationResult[0].emotions.forEach((emotion) => {
           emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
         });
         delete aggregationResult[0].emotions;
       }
-
-      const summary =
-        aggregationResult.length > 0
-          ? { ...aggregationResult[0], emotionCounts }
-          : { count: 0, averageIntensity: 0, emotionCounts: {} };
-
+      
+      const summary = aggregationResult.length > 0
+        ? { ...aggregationResult[0], emotionCounts }
+        : { count: 0, averageIntensity: 0, emotionCounts: {} };
+      
       return summary;
     } catch (err) {
       console.error("Error generating emotion summary:", err);

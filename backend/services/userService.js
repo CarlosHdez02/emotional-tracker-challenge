@@ -43,8 +43,6 @@ export default class UserService {
         
       return await User.create(userData);
     } catch (error) {
-      // Either rethrow the error or handle it appropriately
-      throw error; // Add this line to propagate the error to the controller
     }
   }
 

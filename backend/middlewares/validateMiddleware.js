@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ValidationError } from "./errorMiddleware";
+import { ValidationError } from "./errorMiddleware.js";
 
 export const validate = (schema)=> (req,res,next)=>{
     const {error} = schema.validate(req.body,{
