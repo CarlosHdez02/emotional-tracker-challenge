@@ -28,14 +28,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login user
-  const login = async (userData) => {
+  const login = async (userData, rememberMe = false) => {
     const res = await axios.post(`${API_URL}/users/login`, userData);
     
-    setUser(res.data);
-    Cookie.set('token', res.data.token);
+  
+     userData = res.data.data || res.data;
+    const token = userData.token;
+    
+    setUser(userData);
+    
+    
+    if (rememberMe) {
+
+        Cookie.set('token', token, { expires: 30 });
+    } else {
+
+        Cookie.set('token', token);
+    }
     
     router.push('/dashboard');
-  };
+};
 
   // Logout user
   const logout = () => {

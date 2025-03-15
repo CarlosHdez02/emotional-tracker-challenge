@@ -59,6 +59,9 @@ const Header = () => {
                 <NavLink>Emociones</NavLink>
               </Link>
               <NavLink onClick={logout}>Cerrar Sesión</NavLink>
+              <Link href="/profile">
+              <NavLink>Perfil</NavLink>
+              </Link>
             </>
           ) : (
             <>

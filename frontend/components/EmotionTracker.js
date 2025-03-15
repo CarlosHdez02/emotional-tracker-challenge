@@ -77,38 +77,134 @@ const Button = styled.button`
   &:hover {
     background-color: #2980b9;
   }
+  
+  &:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+`;
+
+const StatusMessage = styled.div`
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+  
+  &.success {
+    background-color: #d5f5e3;
+    color: #27ae60;
+  }
+  
+  &.error {
+    background-color: #f8d7da;
+    color: #c0392b;
+  }
+`;
+
+const CheckboxGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const CheckboxLabel = styled.label`
+  color: #34495e;
+  cursor: pointer;
+`;
+
+const Checkbox = styled.input`
+  cursor: pointer;
 `;
 
 const EmotionTracker = () => {
   const [form, setForm] = useState({
     emotion: 'neutral',
     intensity: 5,
-    notes: ''
+    notes: '',
+    triggers: [],
+    activities: []
   });
   
-  const { addEmotion } = useContext(EmotionContext);
+  const [status, setStatus] = useState({ message: '', type: '' });
+  const { addEmotion, loading } = useContext(EmotionContext);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
+
+  const handleCheckboxChange = (e, category) => {
+    const { value, checked } = e.target;
+    
+    if (checked) {
+      setForm({ 
+        ...form, 
+        [category]: [...form[category], value] 
+      });
+    } else {
+      setForm({ 
+        ...form, 
+        [category]: form[category].filter(item => item !== value) 
+      });
+    }
+  };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    addEmotion({
-      emotion: form.emotion,
-      intensity: Number(form.intensity),
-      notes: form.notes
-    });
-    
-    // Reset form
-    setForm({
-      emotion: 'neutral',
-      intensity: 5,
-      notes: ''
-    });
+    try {
+      await addEmotion({
+        emotion: form.emotion,
+        intensity: Number(form.intensity),
+        notes: form.notes,
+        triggers: form.triggers,
+        activities: form.activities
+      });
+      
+      // Reset form
+      setForm({
+        emotion: 'neutral',
+        intensity: 5,
+        notes: '',
+        triggers: [],
+        activities: []
+      });
+      
+      // Show success message
+      setStatus({ message: 'Emoción registrada exitosamente', type: 'success' });
+      
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setStatus({ message: '', type: '' });
+      }, 3000);
+    } catch (error) {
+      setStatus({ message: 'Error al registrar la emoción', type: 'error' });
+    }
   };
+
+  const triggerOptions = [
+    { value: 'conflict', label: 'Conflicto' },
+    { value: 'stress', label: 'Estrés' },
+    { value: 'achievement', label: 'Logro' },
+    { value: 'disappointment', label: 'Decepción' },
+    { value: 'socialInteraction', label: 'Interacción Social' }
+  ];
+
+  const activityOptions = [
+    { value: 'exercise', label: 'Ejercicio' },
+    { value: 'meditation', label: 'Meditación' },
+    { value: 'reading', label: 'Lectura' },
+    { value: 'socializing', label: 'Socializar' },
+    { value: 'work', label: 'Trabajo' },
+    { value: 'rest', label: 'Descanso' }
+  ];
   
   return (
     <TrackerContainer>
@@ -122,6 +218,7 @@ const EmotionTracker = () => {
             name="emotion"
             value={form.emotion}
             onChange={handleChange}
+            disabled={loading}
           >
             <option value="happy">Feliz</option>
             <option value="sad">Triste</option>
@@ -142,6 +239,7 @@ const EmotionTracker = () => {
               max="10"
               value={form.intensity}
               onChange={handleChange}
+              disabled={loading}
             />
             <RangeLabels>
               <span>Baja</span>
@@ -149,6 +247,48 @@ const EmotionTracker = () => {
               <span>Alta</span>
             </RangeLabels>
           </RangeContainer>
+        </InputGroup>
+
+        <InputGroup>
+          <Label>Desencadenantes</Label>
+          <CheckboxGroup>
+            {triggerOptions.map(option => (
+              <CheckboxContainer key={`trigger-${option.value}`}>
+                <Checkbox
+                  type="checkbox"
+                  id={`trigger-${option.value}`}
+                  value={option.value}
+                  checked={form.triggers.includes(option.value)}
+                  onChange={(e) => handleCheckboxChange(e, 'triggers')}
+                  disabled={loading}
+                />
+                <CheckboxLabel htmlFor={`trigger-${option.value}`}>
+                  {option.label}
+                </CheckboxLabel>
+              </CheckboxContainer>
+            ))}
+          </CheckboxGroup>
+        </InputGroup>
+
+        <InputGroup>
+          <Label>Actividades Realizadas</Label>
+          <CheckboxGroup>
+            {activityOptions.map(option => (
+              <CheckboxContainer key={`activity-${option.value}`}>
+                <Checkbox
+                  type="checkbox"
+                  id={`activity-${option.value}`}
+                  value={option.value}
+                  checked={form.activities.includes(option.value)}
+                  onChange={(e) => handleCheckboxChange(e, 'activities')}
+                  disabled={loading}
+                />
+                <CheckboxLabel htmlFor={`activity-${option.value}`}>
+                  {option.label}
+                </CheckboxLabel>
+              </CheckboxContainer>
+            ))}
+          </CheckboxGroup>
         </InputGroup>
         
         <InputGroup>
@@ -159,10 +299,19 @@ const EmotionTracker = () => {
             value={form.notes}
             onChange={handleChange}
             placeholder="¿Qué desencadenó esta emoción? ¿Algún pensamiento o reflexión?"
+            disabled={loading}
           />
         </InputGroup>
         
-        <Button type="submit">Registrar Emoción</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? 'Guardando...' : 'Registrar Emoción'}
+        </Button>
+        
+        {status.message && (
+          <StatusMessage className={status.type}>
+            {status.message}
+          </StatusMessage>
+        )}
       </Form>
     </TrackerContainer>
   );

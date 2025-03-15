@@ -31,6 +31,22 @@ const FormGroup = styled.div`
   gap: 0.5rem;
 `;
 
+const PasswordContainer = styled.div`
+  position: relative;
+`;
+
+const PasswordToggle = styled.button`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+`;
+
 const Label = styled.label`
   font-weight: bold;
   color: #34495e;
@@ -41,6 +57,23 @@ const Input = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const Checkbox = styled.input`
+  margin: 0;
+`;
+
+const CheckboxLabel = styled.label`
+  color: #34495e;
+  font-size: 0.9rem;
 `;
 
 const Button = styled.button`
@@ -73,6 +106,8 @@ export default function Login() {
     email: '',
     password: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useContext(AuthContext);
   
@@ -81,11 +116,16 @@ export default function Login() {
     setFormData({ ...formData, [name]: value });
   };
   
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    setShowPassword(!showPassword);
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      await login(formData);
+      await login(formData, rememberMe);
     } catch (error) {
       console.error('Login error:', error.response?.data?.message || 'Unknown error');
       alert('Failed to login');
@@ -112,15 +152,30 @@ export default function Login() {
           
           <FormGroup>
             <Label htmlFor="password">Contraseña</Label>
-            <Input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <PasswordContainer>
+              <Input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <PasswordToggle onClick={togglePasswordVisibility}>
+                {showPassword ? "Ocultar" : "Mostrar"}
+              </PasswordToggle>
+            </PasswordContainer>
           </FormGroup>
+          
+          <CheckboxContainer>
+            <Checkbox
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+            />
+            <CheckboxLabel htmlFor="rememberMe">Recordarme</CheckboxLabel>
+          </CheckboxContainer>
           
           <Button type="submit">Iniciar Sesión</Button>
         </Form>
