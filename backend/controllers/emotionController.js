@@ -13,7 +13,6 @@ export default class EmotionController {
     this.emotionService = new EmotionService();
   }
 
-  // Get all emotions for a user
   async getUserEmotions(req, res, next) {
     try {
       const userId = req.params.userId || req.user._id;

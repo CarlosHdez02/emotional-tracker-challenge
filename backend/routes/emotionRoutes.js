@@ -1,5 +1,5 @@
 import express from "express";
-import EmotionController from '../controllers/EmotionController.js';
+import EmotionController from "../controllers/emotionController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 export default class EmotionRoutes {
   router = express.Router();
@@ -12,7 +12,7 @@ export default class EmotionRoutes {
   initializeRoutes() {
     
     this.router.get("/summary/:userId", protect, this.emotionController.getEmotionSummary.bind(this.emotionController));
-    
+    this.router.get("/", protect, this.emotionController.getUserEmotions.bind(this.emotionController));
     this.router.post("/", protect, this.emotionController.createEmotion.bind(this.emotionController));
     
 

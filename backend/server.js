@@ -6,6 +6,7 @@ import { DatabaseConnect } from './database/config.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 import UserRoutes from './routes/userRoutes.js';
 import EmotionRoutes from './routes/emotionRoutes.js';
+import ReminderRoute from './routes/reminderRoutes.js';
 
 dotenv.config();
 console.log(process.env);
@@ -22,11 +23,12 @@ dbConnect.handleInitDb();
 // Initialize routes
 const userRoutesInstance = new UserRoutes();
 const EmotionRoutesInstance = new EmotionRoutes()
+const reminderRoutesInstance = new ReminderRoute()
 
 // Routes
 app.use('/api/users', userRoutesInstance.getRouter());
 app.use('/api/emotions', EmotionRoutesInstance.getRouter())
-
+app.use('/api/reminders',reminderRoutesInstance.getRouter())
 // Unprotected test route
 app.get('/api/status', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
