@@ -1,4 +1,4 @@
-import { ReminderProvider } from '../context/ReminderContext';
+import Layout from '../components/Layout';
 import ReminderForm from '../components/ReminderForm';
 import ReminderList from '../components/ReminderList';
 import styled from 'styled-components';
@@ -26,7 +26,9 @@ const Subtitle = styled.p`
 
 const ReminderPage = () => {
   return (
-    <ReminderProvider>
+    <Layout title="Recordatorios ">
+
+
       <PageContainer>
         <Header>
           <Title>Mental Health Reminders</Title>
@@ -38,7 +40,7 @@ const ReminderPage = () => {
         <ReminderForm />
         <ReminderList />
       </PageContainer>
-    </ReminderProvider>
+      </Layout>
   );
 };
 

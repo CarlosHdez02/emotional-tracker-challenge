@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ReminderContext } from '../context/ReminderContext';
 
@@ -104,6 +104,7 @@ const Button = styled.button`
   cursor: pointer;
   transition: opacity 0.2s;
   flex: ${props => props.fullWidth ? '1' : 'initial'};
+  position: relative;
   
   &:hover {
     opacity: 0.9;
@@ -112,6 +113,44 @@ const Button = styled.button`
   &:disabled {
     background-color: #95a5a6;
     cursor: not-allowed;
+  }
+`;
+
+const ButtonContent = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+`;
+
+const Spinner = styled.div`
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const StatusMessage = styled.div`
+  font-size: 0.8rem;
+  padding: 0.25rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+  
+  &.success {
+    background-color: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+  }
+  
+  &.error {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
   }
 `;
 
@@ -139,13 +178,64 @@ const ReminderList = () => {
     getReminders, 
     toggleReminderStatus 
   } = useContext(ReminderContext);
+  
+  // Track which reminder is being toggled
+  const [togglingReminders, setTogglingReminders] = useState({});
+  // Track status feedback messages
+  const [statusMessages, setStatusMessages] = useState({});
 
   useEffect(() => {
     getReminders();
   }, []);
 
-  const handleToggleStatus = async (reminderId) => {
-    await toggleReminderStatus(reminderId);
+  const handleToggleStatus = async (reminderId, currentStatus) => {
+    // Set loading state for this specific button
+    setTogglingReminders(prev => ({ ...prev, [reminderId]: true }));
+    // Clear any previous status message
+    setStatusMessages(prev => ({ ...prev, [reminderId]: null }));
+    
+    try {
+      // Toggle the status - pass the new status (opposite of current)
+      const newStatus = !currentStatus;
+      const success = await toggleReminderStatus(reminderId, newStatus);
+      
+      if (success) {
+        // Show success message
+        setStatusMessages(prev => ({ 
+          ...prev, 
+          [reminderId]: { 
+            type: 'success', 
+            message: currentStatus ? 'Incomplete' : 'Complete' 
+          } 
+        }));
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setStatusMessages(prev => ({ ...prev, [reminderId]: null }));
+        }, 3000);
+      } else {
+        // Show error message if the operation didn't succeed
+        setStatusMessages(prev => ({ 
+          ...prev, 
+          [reminderId]: { 
+            type: 'error', 
+            message: 'Failed to update status' 
+          } 
+        }));
+      }
+    } catch (err) {
+      // Show error message
+      setStatusMessages(prev => ({ 
+        ...prev, 
+        [reminderId]: { 
+          type: 'error', 
+          message: 'Error updating status' 
+        } 
+      }));
+    } finally {
+      // Clear loading state
+      setTogglingReminders(prev => ({ ...prev, [reminderId]: false }));
+    }
   };
 
   if (loading) {
@@ -188,11 +278,26 @@ const ReminderList = () => {
               <Button 
                 variant={reminder.isCompleted ? 'primary' : 'complete'} 
                 fullWidth
-                onClick={() => handleToggleStatus(reminder._id)}
+                disabled={togglingReminders[reminder._id]}
+                onClick={() => handleToggleStatus(reminder._id, reminder.isCompleted)}
               >
-                {reminder.isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+                <ButtonContent>
+                  {togglingReminders[reminder._id] ? (
+                    <>
+                      <Spinner /> Updating...
+                    </>
+                  ) : (
+                    reminder.isCompleted ? 'Completed' : 'Incomplete'
+                  )}
+                </ButtonContent>
               </Button>
             </ButtonGroup>
+            
+            {statusMessages[reminder._id] && (
+              <StatusMessage className={statusMessages[reminder._id].type}>
+                {statusMessages[reminder._id].message}
+              </StatusMessage>
+            )}
           </ReminderCard>
         ))}
       </RemindersList>

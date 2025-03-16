@@ -10,6 +10,15 @@ const Main = styled.main`
   padding: 1rem;
 `;
 
+const LoadingIndicator = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.2rem;
+  color: #666;
+`;
+
 const Layout = ({ title, description, children }) => {
   const { user, loading } = useContext(AuthContext);
 
@@ -19,14 +28,16 @@ const Layout = ({ title, description, children }) => {
         <title>{title || 'Emotional Tracker'}</title>
         <meta name="description" content={description || 'Track your emotional wellbeing'} />
         <link rel="icon" href="/favicon.ico" />
-        {/* No CSP headers */}
       </Head>
 
       <Header />
       
       <Main>
-        {/* No loading indicator */}
-        {children}
+        {loading ? (
+          <LoadingIndicator>Loading...</LoadingIndicator>
+        ) : (
+          children
+        )}
       </Main>
     </>
   );
