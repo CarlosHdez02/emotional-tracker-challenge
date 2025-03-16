@@ -115,7 +115,7 @@ export default class ReminderController {
   }
 
   // Toggle reminder completion status
-  async   toggleReminderCompletion(req, res, next) {
+  async  toggleReminderCompletion(req, res, next) {
     try {
       const { id } = req.params;
       

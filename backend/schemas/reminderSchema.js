@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export const reminderCreateSchema = Joi.object({
-  userId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
+  //userId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
   title: Joi.string().trim().max(100).required(),
   description: Joi.string().max(500).allow('', null),
   activity: Joi.string().trim().max(100).required(),
