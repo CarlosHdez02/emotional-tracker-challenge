@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import styled from "styled-components";
 import Layout from "../components/Layout";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
 
 const ProfileContainer = styled.div`
   display: flex;
@@ -148,7 +147,7 @@ const CancelButton = styled(Button)`
 `;
 
 export default function Profile() {
-  const { user, loading, setUser } = useContext(AuthContext);
+  const { user, loading, updateProfile, updatePassword } = useContext(AuthContext);
   const router = useRouter();
   
   const [userData, setUserData] = useState({
@@ -210,15 +209,7 @@ export default function Profile() {
       setIsSaving(true);
       setMessage(null);
       
-      const response = await axios.put('/api/user/profile', userData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
-      // Update the user context with the new data
-      setUser({
-        ...user,
-        ...response.data
-      });
+      await updateProfile(userData);
       
       setMessage({
         type: 'success',
@@ -240,29 +231,6 @@ export default function Profile() {
     }
   };
   
-  const openResetModal = (e) => {
-    e.preventDefault();
-    
-    // Validate password inputs before showing confirmation modal
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordMessage({
-        type: 'error',
-        text: 'Las contraseñas no coinciden'
-      });
-      return;
-    }
-    
-    if (passwordData.newPassword.length < 8) {
-      setPasswordMessage({
-        type: 'error',
-        text: 'La contraseña debe tener al menos 8 caracteres'
-      });
-      return;
-    }
-    
-    setShowModal(true);
-  };
-  
   const handleResetPassword = async () => {
     setShowModal(false);
     
@@ -270,8 +238,9 @@ export default function Profile() {
       setIsResetting(true);
       setPasswordMessage(null);
       
-      const response = await axios.put('/api/user/reset-password', passwordData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      await updatePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
       });
       
       setPasswordMessage({
@@ -308,6 +277,30 @@ export default function Profile() {
     } finally {
       setIsResetting(false);
     }
+  };
+  
+  
+  const openResetModal = (e) => {
+    e.preventDefault();
+    
+    // Validate password inputs before showing confirmation modal
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({
+        type: 'error',
+        text: 'Las contraseñas no coinciden'
+      });
+      return;
+    }
+    
+    if (passwordData.newPassword.length < 8) {
+      setPasswordMessage({
+        type: 'error',
+        text: 'La contraseña debe tener al menos 8 caracteres'
+      });
+      return;
+    }
+    
+    setShowModal(true);
   };
   
   if (loading || !user) {

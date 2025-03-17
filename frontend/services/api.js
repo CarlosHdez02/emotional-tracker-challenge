@@ -103,14 +103,17 @@ export default class APIService {
     
     async updateUserPassword(newPassword){
         try{
-            const response = await fetch(`${this.baseUrl}/password-reset-request`,{
-                method:"PUT",
+            const response = await fetch(`${this.baseUrl}/t`,{
+                method:"PATCH",
                 headers:{
-                    'Content-Type':'application/json'
+                    'Content-Type':'application/json',
+                    'Authorization': `Bearer ${this.token}`
                 },
                 body:JSON.stringify(newPassword)
 
             })
+            const data = await response.json()
+            return data;
         }catch(err){
             console.error(err,"here")
         }

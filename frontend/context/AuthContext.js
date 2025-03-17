@@ -79,7 +79,30 @@ export const AuthProvider = ({ children }) => {
     
     setLoading(false);
   };
-
+  const updatePassword = async (passwordData) => {
+    const token = Cookie.get('token');
+    
+    if (token && user) {
+      try {
+        const res = await axios.patch(
+          `${API_URL}/users/change-password/${user._id}`,
+          passwordData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        
+        return res.data;
+      } catch (error) {
+        throw error;
+      }
+    }
+    
+    return null;
+  };
+  
   const updateProfile = async (userData) => {
     const token = Cookie.get('token');
     
@@ -97,6 +120,9 @@ export const AuthProvider = ({ children }) => {
     return null;
   };
 
+  
+  
+
   return (
     <AuthContext.Provider
       value={{
@@ -105,7 +131,8 @@ export const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
-        updateProfile
+        updateProfile,
+        updatePassword
       }}
     >
       {children}
