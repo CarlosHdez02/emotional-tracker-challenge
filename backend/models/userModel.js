@@ -36,12 +36,32 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-// Method to compare passwords
-userSchema.methods.matchPassword = function (enteredPassword) {
+userSchema.methods.comparePassword = function (enteredPassword) {
   return bcrypt.compareSync(enteredPassword, this.password);
 };
 
-// TODO: Add a method to sanitize user data before sending to client
+// Method to sanitize user data before sending to client
+userSchema.methods.sanitize = function() {
+  const userObject = this.toObject();
+  
+  // Remove sensitive fields
+  delete userObject.password;
+  
+  // You can remove additional fields if needed
+  // delete userObject.therapistId;
+  // delete userObject.__v;
+  
+  return userObject;
+};
+
+// Static method to sanitize multiple users at once
+userSchema.statics.sanitizeMany = function(users) {
+  return users.map(user => {
+    const userObject = user.toObject ? user.toObject() : user;
+    delete userObject.password;
+    return userObject;
+  });
+};
 
 const User = mongoose.model("User", userSchema);
 

@@ -60,4 +60,31 @@ export default class UserService {
       console.error(err);
     }
   }
+  async changePassword(userId, currentPassword, newPassword) {
+    try {
+      const user = await User.findById(userId);
+      
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
+      
+      const isMatch = await user.comparePassword(currentPassword);
+      
+      if (!isMatch) {
+        throw new AuthError("Current password is incorrect");
+      }
+      
+      user.password = newPassword;
+      
+      // Save the user with the new password
+      const updatedUser = await user.save();
+      
+      return {
+        success: true,
+        message: "Password updated successfully"
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

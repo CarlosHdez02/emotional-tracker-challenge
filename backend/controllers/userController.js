@@ -83,7 +83,6 @@ export default class UserController {
   // Update user
   async updateUser(req, res, next) {
     try {
-      // Get user ID from authenticated user in req object (set by protect middleware)
       const id = req.user._id;
       
       // Prevent password updates through this endpoint
@@ -99,7 +98,6 @@ export default class UserController {
           _id: updatedUser._id,
           name: updatedUser.name,
           email: updatedUser.email
-          // Add other non-sensitive fields as needed
         }
       });
     } catch (err) {
@@ -107,49 +105,25 @@ export default class UserController {
     }
   }
 
-  // Request password reset
-  async requestPasswordReset(req, res, next) {
+  
+  async updatePassword(req, res, next) {
     try {
-      const { email } = req.body;
+      const { userId } = req.params;
+      const { currentPassword, newPassword } = req.body;
       
-      if (!email) {
-        throw new ValidationError("Please provide an email address");
+      // Validate inputs
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Current password and new password are required" 
+        });
       }
       
-      const resetToken = await this.authService.createPasswordResetToken(email);
+      const result = await this.userService.changePassword(userId, currentPassword, newPassword);
       
-      // In a real application, you would send the token via email
-      // For development purposes, you might return it in the response
-      
-      return res.status(200).json({
-        success: true,
-        message: "Password reset token generated successfully",
-        // Remove this in production, send via email instead
-        resetToken
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  // Reset password using token
-  async resetPassword(req, res, next) {
-    try {
-      const { resetToken } = req.params;
-      const { password } = req.body;
-      
-      if (!password) {
-        throw new ValidationError("Please provide a new password");
-      }
-      
-      await this.authService.passwordReset(resetToken, password);
-      
-      return res.status(200).json({
-        success: true,
-        message: "Password has been reset successfully"
-      });
-    } catch (err) {
-      next(err);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
     }
   }
 }

@@ -43,7 +43,7 @@ export default class AuthService {
         throw new NotFoundError("There is no user in database with that email");
       }
 
-      const isPasswordValid = await user.matchPassword(password);
+      const isPasswordValid = await user.comparePassword(password);
 
       if (!isPasswordValid) {
         throw new AuthError("Invalid password");

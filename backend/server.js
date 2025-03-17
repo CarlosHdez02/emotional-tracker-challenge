@@ -9,7 +9,7 @@ import EmotionRoutes from './routes/emotionRoutes.js';
 import ReminderRoute from './routes/reminderRoutes.js';
 
 dotenv.config();
-console.log(process.env);
+
 const app = express();
 
 // Middleware
@@ -22,13 +22,14 @@ dbConnect.handleInitDb();
 
 // Initialize routes
 const userRoutesInstance = new UserRoutes();
-const EmotionRoutesInstance = new EmotionRoutes()
-const reminderRoutesInstance = new ReminderRoute()
+const emotionRoutesInstance = new EmotionRoutes();
+const reminderRoutesInstance = new ReminderRoute();
 
 // Routes
 app.use('/api/users', userRoutesInstance.getRouter());
-app.use('/api/emotions', EmotionRoutesInstance.getRouter())
-app.use('/api/reminders',reminderRoutesInstance.getRouter())
+app.use('/api/emotions', emotionRoutesInstance.getRouter());
+app.use('/api/reminders', reminderRoutesInstance.getRouter());
+
 // Unprotected test route
 app.get('/api/status', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
@@ -41,5 +42,11 @@ app.use((req, res) => {
 
 // Error middleware
 app.use(errorHandler);
+
 const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+export { app, server };

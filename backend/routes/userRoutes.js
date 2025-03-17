@@ -14,8 +14,10 @@ export default class UserRoutes {
     // Public routes
     this.router.post("/register", this.userController.registerUser.bind(this.userController));
     this.router.post("/login", this.userController.loginUser.bind(this.userController));
-    this.router.post("/password-reset-request", this.userController.requestPasswordReset.bind(this.userController));
-    this.router.post("/password-reset/:resetToken", this.userController.resetPassword.bind(this.userController));
+    
+    // Password reset routes (public)
+    //this.router.post("/forgot-password", this.userController.requestPasswordReset.bind(this.userController));
+    this.router.patch("/change-password/:userId", protect, this.userController.updatePassword.bind(this.userController))
 
     // Protected routes
     this.router.get("/profile/:id", protect, this.userController.getUserProfile.bind(this.userController));
