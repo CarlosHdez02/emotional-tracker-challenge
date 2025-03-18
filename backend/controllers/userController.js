@@ -61,7 +61,7 @@ export default class UserController {
   async getUserProfile(req, res, next) {
     try {
       const { id } = req.params; 
-      debugger
+      
       const user = await this.userService.findUserById(id);
       if (!user) throw new Error("User not found");
   

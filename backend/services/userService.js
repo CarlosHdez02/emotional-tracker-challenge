@@ -22,11 +22,11 @@ export default class UserService {
   async findUserById(id) {
     try {
       const user = await User.findById(id);
-      debugger
+     
 
       // Check if user exists
       if (!user) throw new NotFoundError("User not found");
-      debugger
+      
 
       return user;
     } catch (error) {
