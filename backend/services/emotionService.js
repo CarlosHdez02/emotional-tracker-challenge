@@ -63,8 +63,7 @@ export default class EmotionService {
         ? new mongoose.Types.ObjectId(userId) 
         : userId;
       
-      console.log('Getting emotions summary for user:', userId);
-      console.log('Converted ObjectId:', userObjectId);
+    
       
       const aggregationResult = await Emotion.aggregate([
         { $match: { user: userObjectId } },

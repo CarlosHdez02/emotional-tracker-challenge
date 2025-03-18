@@ -9,8 +9,6 @@ export class DatabaseConnect{
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
             })
-            console.log('MongoDB connected')
-            console.log('refactor worked')
         }catch(err){
             console.error("MongoDB connection error: ",err)
         }
