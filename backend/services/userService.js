@@ -33,6 +33,13 @@ export default class UserService {
  
     }
   }
+  async findUsers() {
+    try {
+        return await User.find({});
+    } catch (err) {
+        throw new Error('Error fetching users');
+    }
+}
 
   // Create new user
   async createUser(userData) {

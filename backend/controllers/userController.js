@@ -78,6 +78,18 @@ export default class UserController {
       next(err);
     }
   }
+
+  async getUsers(req, res, next) {
+    try {
+        const users = await this.userService.findUsers();
+        return res.status(200).json({
+            success: true,
+            data: { users }
+        });
+    } catch (err) {
+        next(err);
+    }
+}
   
 
   // Update user
