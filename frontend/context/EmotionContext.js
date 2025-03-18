@@ -18,9 +18,9 @@ export const EmotionProvider = ({ children }) => {
     setError(null);
     try {
       const fetchedEmotions = await apiService.getLoggedInUserEmotions();
-      console.log(fetchedEmotions)
+    
       setEmotions(fetchedEmotions.data)
-      console.log(emotions)
+
      
     } catch (error) {
       console.error("Error fetching emotions:", error);

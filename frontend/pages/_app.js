@@ -2,6 +2,7 @@ import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { AuthProvider } from '../context/AuthContext';
 import { EmotionProvider } from '../context/EmotionContext';
 import { ReminderProvider } from '../context/ReminderContext';
+import { DataSharingProvider } from '../context/DataSharingContext';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
@@ -43,9 +44,13 @@ function MyApp({ Component, pageProps }) {
       <ThemeProvider theme={theme}>
         <AuthProvider>
           <EmotionProvider>
+            <DataSharingProvider>
+
+      
           <ReminderProvider>
             <Component {...pageProps} />
             </ReminderProvider>
+            </DataSharingProvider>
           </EmotionProvider>
         </AuthProvider>
       </ThemeProvider>
