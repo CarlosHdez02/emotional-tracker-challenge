@@ -31,9 +31,9 @@ const ReminderPage = () => {
 
       <PageContainer>
         <Header>
-          <Title>Mental Health Reminders</Title>
+          <Title>Recordatorios de salud mental</Title>
           <Subtitle>
-            Schedule activities to improve your mental wellbeing
+           Agenda actividades para mejorar la salud mental
           </Subtitle>
         </Header>
         

@@ -168,7 +168,7 @@ export default function Profile() {
   
   // Modal state
   const [showModal, setShowModal] = useState(false);
-  
+ 
   // Load user data when component mounts
   useEffect(() => {
     if (user) {

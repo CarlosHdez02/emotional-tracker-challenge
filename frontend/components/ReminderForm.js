@@ -151,7 +151,7 @@ const ReminderForm = () => {
   
   return (
     <ReminderContainer>
-      <Title>Create Mental Health Reminder</Title>
+      <Title>Crea un recordatorio para tu salud mental</Title>
       
       <Form onSubmit={handleSubmit}>
         <InputGroup>
@@ -164,12 +164,12 @@ const ReminderForm = () => {
             onChange={handleChange}
             required
             disabled={loading}
-            placeholder="Enter a title for your reminder"
+            placeholder="Escribe el titulo"
           />
         </InputGroup>
         
         <InputGroup>
-          <Label htmlFor="activity">Activity</Label>
+          <Label htmlFor="activity">Actividad</Label>
           <Input
             type="text"
             id="activity"
@@ -178,7 +178,7 @@ const ReminderForm = () => {
             onChange={handleChange}
             required
             disabled={loading}
-            placeholder="What activity do you need to do?"
+            placeholder="Que actividad necesitas hacer?"
           />
         </InputGroup>
         
@@ -191,18 +191,18 @@ const ReminderForm = () => {
             onChange={handleChange}
             disabled={loading}
           >
-            <option value="meditation">Meditation</option>
-            <option value="exercise">Exercise</option>
-            <option value="journaling">Journaling</option>
-            <option value="breathing">Breathing Exercise</option>
-            <option value="social">Social Activity</option>
-            <option value="nature">Nature Time</option>
-            <option value="other">Other</option>
+            <option value="meditation">Meditacion</option>
+            <option value="exercise">Ejercicio</option>
+            <option value="journaling">Periodismo</option>
+            <option value="breathing">Ejercicios de respiracion</option>
+            <option value="social">Actividad social</option>
+            <option value="nature">Tiempo con naturaleza</option>
+            <option value="other">Otros</option>
           </Select>
         </InputGroup>
         
         <InputGroup>
-          <Label htmlFor="scheduledTime">Scheduled Time</Label>
+          <Label htmlFor="scheduledTime">Tiempo agendado</Label>
           <Input
             type="datetime-local"
             id="scheduledTime"
@@ -215,7 +215,7 @@ const ReminderForm = () => {
         </InputGroup>
         
         <InputGroup>
-          <Label htmlFor="frequency">Frequency</Label>
+          <Label htmlFor="frequency">Frequencia</Label>
           <Select
             id="frequency"
             name="frequency"
@@ -223,15 +223,15 @@ const ReminderForm = () => {
             onChange={handleChange}
             disabled={loading}
           >
-            <option value="once">Once</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
+            <option value="once">Una vez</option>
+            <option value="daily">Diario</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensual</option>
           </Select>
         </InputGroup>
         
         <InputGroup>
-          <Label htmlFor="description">Description (Optional)</Label>
+          <Label htmlFor="description">Descripcion (Opcional)</Label>
           <TextArea
             id="description"
             name="description"
