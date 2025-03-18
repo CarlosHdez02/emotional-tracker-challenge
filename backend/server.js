@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errorMiddleware.js';
 import UserRoutes from './routes/userRoutes.js';
 import EmotionRoutes from './routes/emotionRoutes.js';
 import ReminderRoute from './routes/reminderRoutes.js';
+import TherapistRoute from './routes/therapistRoutes.js';
 
 dotenv.config();
 
@@ -24,11 +25,13 @@ dbConnect.handleInitDb();
 const userRoutesInstance = new UserRoutes();
 const emotionRoutesInstance = new EmotionRoutes();
 const reminderRoutesInstance = new ReminderRoute();
+const therapistRoutesInstance = new TherapistRoute()
 
 // Routes
 app.use('/api/users', userRoutesInstance.getRouter());
 app.use('/api/emotions', emotionRoutesInstance.getRouter());
 app.use('/api/reminders', reminderRoutesInstance.getRouter());
+app.use('/api/therapist', therapistRoutesInstance.getRouter())
 
 // Unprotected test route
 app.get('/api/status', (req, res) => {

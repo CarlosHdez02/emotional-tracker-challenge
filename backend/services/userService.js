@@ -43,6 +43,7 @@ export default class UserService {
         
       return await User.create(userData);
     } catch (error) {
+      throw error
     }
   }
 
