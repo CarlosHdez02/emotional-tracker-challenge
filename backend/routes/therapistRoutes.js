@@ -17,6 +17,12 @@ export default class TherapistRoute {
       protect,
       this.therapistController.assignTherapist.bind(this.therapistController)
     );
+
+    this.router.get(
+        "/assigned",
+        protect,
+        this.therapistController.getAssignedTherapist.bind(this.therapistController)
+      );
     
     // Remove therapist from user - fixed to not use userId param
     this.router.delete(

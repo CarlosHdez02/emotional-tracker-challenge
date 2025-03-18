@@ -7,6 +7,37 @@ export default class TherapistService {
   constructor() {
     this.emotionService = new EmotionService();
   }
+
+  async getAssignedTherapist(userId) {
+    try {
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new NotFoundError("User not found");
+        }
+
+        // Check if a therapist is assigned
+        if (!user.therapistId) {
+            throw new ValidationError("No therapist assigned to this user");
+        }
+
+        // Fetch therapist details
+        const therapist = await User.findById(user.therapistId);
+        if (!therapist || therapist.role !== 'therapist') {
+            throw new NotFoundError("Assigned therapist not found");
+        }
+
+        return {
+            success: true,
+            message: "Assigned therapist retrieved successfully",
+            therapist: therapist.sanitize()
+        };
+    } catch (err) {
+        console.error("Error retrieving assigned therapist:", err);
+        throw err;
+    }
+}
+
   
   async assignTherapistToUser(userId, therapistEmail) {
     try {

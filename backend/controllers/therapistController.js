@@ -16,6 +16,8 @@ export default class TherapistController {
           message: "Therapist email is required"
         });
       }
+
+      
       
       const updatedUser = await this.therapistService.assignTherapistToUser(userId, email);
       res.status(200).json({
@@ -24,6 +26,18 @@ export default class TherapistController {
         data: updatedUser,
         therapistId: updatedUser.therapistId
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAssignedTherapist(req, res, next) {
+    try {
+      const userId = req.user._id;
+      
+      const result = await this.therapistService.getAssignedTherapist(userId);
+      
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -67,6 +81,7 @@ export default class TherapistController {
           message: "Therapist ID is required"
         });
       }
+      
       
       const result = await this.therapistService.getTherapistDetails(userId, therapistId);
       const isAssigned = req.user.therapistId && req.user.therapistId.toString() === therapistId;
