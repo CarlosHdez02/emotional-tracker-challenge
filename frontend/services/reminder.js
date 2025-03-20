@@ -21,7 +21,7 @@ export default class Reminders {
             return data;
         } catch (err) {
             console.error(err, "err at reminder service");
-            throw err; // Re-throw so calling code can handle it
+            throw err; 
         }
     }
     
@@ -70,7 +70,7 @@ export default class Reminders {
     
     async updateUserReminder(reminderId, reminderData) {
         try {
-            // Check if this path is correct - removed extra "reminder"
+           
             const response = await fetch(`${this.baseUrl}/${reminderId}`, {
                 method: "PUT",
                 headers: {
@@ -94,7 +94,7 @@ export default class Reminders {
     
     async updateReminderStatus(reminderId, status) {
         try {
-            // Fixed URL path - added slash after "toggle"
+            
             const response = await fetch(`${this.baseUrl}/toggle/${reminderId}`, {
                 method: "PATCH",
                 headers: {
@@ -111,6 +111,26 @@ export default class Reminders {
             const data = await response.json();
             return data;
         } catch (err) {
+            console.error(err, "err at toggle status");
+            throw err;
+        }
+    }
+
+    async deleteReminder(reminderId){
+        try{
+            const response = await fetch(`${this.baseUrl}/${reminderId}`,{
+                method:"DELETE",
+                headers:{
+                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                }
+            })
+            if(!response.ok){
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            const data = await response.json()
+            return data
+        }catch(err){
             console.error(err, "err at toggle status");
             throw err;
         }

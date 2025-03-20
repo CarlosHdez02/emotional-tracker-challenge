@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor} from '@testing-library/react';
+import {expect} from '@testing-library/jest-dom';
 import ReminderList from '../../components/ReminderList';
 import { ReminderContext } from '../../context/ReminderContext';
-import userEvent from '@testing-library/user-event';
+//import userEvent from '@testing-library/user-event';
 
 // Mock data for testing
 const mockReminders = [

@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ReminderContext } from '../context/ReminderContext';
+import ReminderUpdateModal from './ReminderUpdateModal';
+import { ConfirmationModal } from './Modal';
 
 const ListContainer = styled.div`
   background-color: white;
@@ -95,7 +97,11 @@ const ButtonGroup = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: ${props => props.variant === 'complete' ? '#27ae60' : props.variant === 'delete' ? '#e74c3c' : '#3498db'};
+  background-color: ${props => 
+    props.variant === 'complete' ? '#27ae60' : 
+    props.variant === 'delete' ? '#e74c3c' : 
+    props.variant === 'edit' ? '#f39c12' : '#3498db'
+  };
   color: white;
   border: none;
   border-radius: 4px;
@@ -159,6 +165,40 @@ const LoadingMessage = styled.p`
   color: #7f8c8d;
 `;
 
+// Pagination styles
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  gap: 0.5rem;
+`;
+
+const PageButton = styled.button`
+  background-color: ${props => props.active ? '#3498db' : '#f1f5f9'};
+  color: ${props => props.active ? 'white' : '#475569'};
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: ${props => props.active ? '#2980b9' : '#e2e8f0'};
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ActionButtonGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
 const formatDate = (dateString) => {
   const options = { 
     year: 'numeric', 
@@ -176,17 +216,55 @@ const ReminderList = () => {
     loading, 
     error, 
     getReminders, 
-    toggleReminderStatus 
+    toggleReminderStatus,
+    deleteReminder
   } = useContext(ReminderContext);
   
   // Track which reminder is being toggled
   const [togglingReminders, setTogglingReminders] = useState({});
+  // Track which reminder is being deleted
+  const [deletingReminders, setDeletingReminders] = useState({});
   // Track status feedback messages
   const [statusMessages, setStatusMessages] = useState({});
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  const [paginatedReminders, setPaginatedReminders] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  
+  // Update modal state
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedReminderId, setSelectedReminderId] = useState(null);
+  
+  // Delete confirmation modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [reminderToDelete, setReminderToDelete] = useState(null);
 
+  // Initialize reminders and pagination
   useEffect(() => {
     getReminders();
   }, []);
+
+  // Update pagination when reminders change
+  useEffect(() => {
+    if (Array.isArray(reminders)) {
+      setTotalPages(Math.ceil(reminders.length / itemsPerPage));
+      
+      // Ensure current page is valid
+      if (currentPage > Math.ceil(reminders.length / itemsPerPage) && reminders.length > 0) {
+        setCurrentPage(1);
+      }
+      
+      // Paginate reminders
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      setPaginatedReminders(reminders.slice(startIndex, endIndex));
+    } else {
+      setPaginatedReminders([]);
+      setTotalPages(0);
+    }
+  }, [reminders, currentPage, itemsPerPage]);
 
   const handleToggleStatus = async (reminderId, currentStatus) => {
     // Set loading state for this specific button
@@ -205,7 +283,7 @@ const ReminderList = () => {
           ...prev, 
           [reminderId]: { 
             type: 'success', 
-            message: currentStatus ? 'Incomplete' : 'Complete' 
+            message: currentStatus ? 'Marked as incomplete' : 'Marked as complete' 
           } 
         }));
         
@@ -237,8 +315,77 @@ const ReminderList = () => {
       setTogglingReminders(prev => ({ ...prev, [reminderId]: false }));
     }
   };
+  
+  const openDeleteModal = (reminder) => {
+    setReminderToDelete(reminder);
+    setIsDeleteModalOpen(true);
+  };
+  
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setReminderToDelete(null);
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!reminderToDelete) return;
+    
+    const reminderId = reminderToDelete._id;
+    setDeletingReminders(prev => ({ ...prev, [reminderId]: true }));
+    
+    try {
+      const success = await deleteReminder(reminderId);
+      
+      if (!success) {
+        // Show error message if the operation didn't succeed
+        setStatusMessages(prev => ({ 
+          ...prev, 
+          [reminderId]: { 
+            type: 'error', 
+            message: 'Failed to delete reminder' 
+          } 
+        }));
+      }
+    } catch (err) {
+      // Show error message
+      setStatusMessages(prev => ({ 
+        ...prev, 
+        [reminderId]: { 
+          type: 'error', 
+          message: 'Error deleting reminder' 
+        } 
+      }));
+    } finally {
+      // Clear loading state
+      setDeletingReminders(prev => ({ ...prev, [reminderId]: false }));
+      // Close modal
+      closeDeleteModal();
+    }
+  };
+  
+  const openUpdateModal = (reminderId) => {
+    setSelectedReminderId(reminderId);
+    setIsUpdateModalOpen(true);
+  };
+  
+  const closeUpdateModal = () => {
+    setIsUpdateModalOpen(false);
+    setSelectedReminderId(null);
+  };
 
-  if (loading) {
+  // Pagination handlers
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  if (loading && !paginatedReminders.length) {
     return <LoadingMessage>Loading reminders...</LoadingMessage>;
   }
 
@@ -255,7 +402,7 @@ const ReminderList = () => {
       )}
       
       <RemindersList>
-        {Array.isArray(reminders) && reminders.map(reminder => (
+        {Array.isArray(paginatedReminders) && paginatedReminders.map(reminder => (
           <ReminderCard key={reminder._id} completed={reminder.isCompleted}>
             <ReminderHeader>
               <ReminderTitle completed={reminder.isCompleted}>{reminder.title}</ReminderTitle>
@@ -287,11 +434,27 @@ const ReminderList = () => {
                       <Spinner /> Updating...
                     </>
                   ) : (
-                    reminder.isCompleted ? 'Completed' : 'Incomplete'
+                    reminder.isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'
                   )}
                 </ButtonContent>
               </Button>
             </ButtonGroup>
+            
+            <ActionButtonGroup>
+              <Button 
+                variant="edit" 
+                onClick={() => openUpdateModal(reminder._id)}
+              >
+                Edit
+              </Button>
+              
+              <Button 
+                variant="delete" 
+                onClick={() => openDeleteModal(reminder)}
+              >
+                Delete
+              </Button>
+            </ActionButtonGroup>
             
             {statusMessages[reminder._id] && (
               <StatusMessage className={statusMessages[reminder._id].type}>
@@ -301,6 +464,53 @@ const ReminderList = () => {
           </ReminderCard>
         ))}
       </RemindersList>
+      
+      {totalPages > 1 && (
+        <PaginationContainer>
+          <PageButton 
+            onClick={goToPreviousPage} 
+            disabled={currentPage === 1}
+          >
+            &lt; Prev
+          </PageButton>
+          
+          {[...Array(totalPages)].map((_, index) => (
+            <PageButton
+              key={index + 1}
+              active={currentPage === index + 1}
+              onClick={() => goToPage(index + 1)}
+            >
+              {index + 1}
+            </PageButton>
+          ))}
+          
+          <PageButton 
+            onClick={goToNextPage} 
+            disabled={currentPage === totalPages}
+          >
+            Next &gt;
+          </PageButton>
+        </PaginationContainer>
+      )}
+      
+      {/* Update Modal */}
+      <ReminderUpdateModal 
+        isOpen={isUpdateModalOpen} 
+        onClose={closeUpdateModal} 
+        reminderId={selectedReminderId} 
+      />
+      
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Reminder"
+        message="Are you sure you want to delete this reminder? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={reminderToDelete ? deletingReminders[reminderToDelete._id] : false}
+      />
     </ListContainer>
   );
 };

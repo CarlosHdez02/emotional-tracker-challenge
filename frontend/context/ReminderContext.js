@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import Reminders from '../services/reminder'; // Adjust path as needed
+import Reminders from '../services/reminder'; 
 
 // Create context
 export const ReminderContext = createContext();
@@ -8,7 +8,7 @@ export const ReminderProvider = ({ children }) => {
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Initialize reminders service
   const reminderService = new Reminders();
 
@@ -18,7 +18,14 @@ export const ReminderProvider = ({ children }) => {
     setError(null);
     try {
       const fetchedReminders = await reminderService.getUserReminder();
-      setReminders(fetchedReminders.data || fetchedReminders);
+      const reminderData = fetchedReminders.data || fetchedReminders;
+      
+      // Sort reminders by creation date (newest first)
+      const sortedReminders = Array.isArray(reminderData) ? 
+        [...reminderData].sort((a, b) => new Date(b.createdAt || b.scheduledTime) - new Date(a.createdAt || a.scheduledTime)) : 
+        [];
+        
+      setReminders(sortedReminders);
     } catch (error) {
       console.error("Error fetching reminders:", error);
       setError("Error loading reminders");
@@ -31,15 +38,20 @@ export const ReminderProvider = ({ children }) => {
   const addReminder = async (reminderData) => {
     setLoading(true);
     try {
-      const newReminder = await reminderService.createNewReminder({
-        ...reminderData,
-      //  createdAt: new Date().toISOString()
-      });
+      const response = await reminderService.createNewReminder(reminderData);
+      
+      // Handle different response structures
+      const newReminder = response.data || response;
       
       if (newReminder) {
-        setReminders(prevReminders => 
-          Array.isArray(prevReminders) ? [newReminder, ...prevReminders] : [newReminder]
-        );
+      
+        setReminders(prevReminders => {
+          const updatedReminders = Array.isArray(prevReminders) ? 
+            [newReminder, ...prevReminders] : 
+            [newReminder];
+            
+          return updatedReminders;
+        });
         return true;
       }
       return false;
@@ -56,12 +68,15 @@ export const ReminderProvider = ({ children }) => {
   const updateReminder = async (reminderId, reminderData) => {
     setLoading(true);
     try {
-      const updatedReminder = await reminderService.updateUserReminder(reminderId, reminderData);
+      const response = await reminderService.updateUserReminder(reminderId, reminderData);
       
+      // Handle different response structures
+      const updatedReminder = response.data || response;
+
       if (updatedReminder) {
         setReminders(prevReminders => {
           if (!Array.isArray(prevReminders)) return [updatedReminder];
-          
+
           return prevReminders.map(reminder => 
             reminder.id === reminderId || reminder._id === reminderId ? updatedReminder : reminder
           );
@@ -79,28 +94,80 @@ export const ReminderProvider = ({ children }) => {
   };
 
   // Toggle reminder status (complete/incomplete)
-  const toggleReminderStatus = async (reminderId, status) => {
-    setLoading(true);
+  const toggleReminderStatus = async (reminderId, isCompleted) => {
     try {
-      await reminderService.updateReminderStatus(reminderId, { status });
-      
+
       setReminders(prevReminders => {
         if (!Array.isArray(prevReminders)) return prevReminders;
-        
+
         return prevReminders.map(reminder => {
           if (reminder.id === reminderId || reminder._id === reminderId) {
-            return { ...reminder, status };
+            return { ...reminder, isCompleted };
           }
           return reminder;
         });
       });
+      
+      // Then update the server
+      const response = await reminderService.updateReminderStatus(reminderId, { isCompleted });
+      
+      // If the server response indicates failure, revert the UI
+      if (!response) {
+        setReminders(prevReminders => {
+          return prevReminders.map(reminder => {
+            if (reminder.id === reminderId || reminder._id === reminderId) {
+              return { ...reminder, isCompleted: !isCompleted };
+            }
+            return reminder;
+          });
+        });
+        return false;
+      }
+      
       return true;
     } catch (error) {
       console.error("Error toggling reminder status:", error);
+      // Revert the UI on error
+      setReminders(prevReminders => {
+        return prevReminders.map(reminder => {
+          if (reminder.id === reminderId || reminder._id === reminderId) {
+            return { ...reminder, isCompleted: !isCompleted };
+          }
+          return reminder;
+        });
+      });
       setError("Error updating reminder status");
       return false;
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  // Delete a reminder
+  const deleteReminder = async (reminderId) => {
+    try {
+      // First update the UI optimistically
+      setReminders(prevReminders => {
+        if (!Array.isArray(prevReminders)) return prevReminders;
+        return prevReminders.filter(reminder => 
+          reminder.id !== reminderId && reminder._id !== reminderId
+        );
+      });
+      
+      // Then update the server
+      const success = await reminderService.deleteReminder(reminderId);
+      
+      // If the server request fails, refresh the list
+      if (!success) {
+        getReminders();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting reminder:", error);
+      // Refresh the list to ensure correct state
+      getReminders();
+      setError("Error deleting reminder");
+      return false;
     }
   };
 
@@ -135,6 +202,7 @@ export const ReminderProvider = ({ children }) => {
         addReminder,
         updateReminder,
         toggleReminderStatus,
+        deleteReminder,
         getReminderById,
         clearError
       }}
@@ -143,3 +211,5 @@ export const ReminderProvider = ({ children }) => {
     </ReminderContext.Provider>
   );
 };
+
+export default ReminderProvider;

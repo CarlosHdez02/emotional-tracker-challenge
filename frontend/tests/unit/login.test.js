@@ -33,18 +33,6 @@ describe('Login Component', () => {
     jest.clearAllMocks();
   });
 
-  /*test('renders login form with all elements', () => {
-    renderLoginWithContext();
-    
-    expect(screen.getByText('Inicia Sesión en tu Cuenta')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Correo Electrónico/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Contraseña/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Recordarme/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Iniciar Sesión/i })).toBeInTheDocument();
-    expect(screen.getByText(/¿No tienes una cuenta?/i)).toBeInTheDocument();
-    expect(screen.getByText(/Regístrate/i)).toBeInTheDocument();
-  });*/
-
   test('updates email input value when typed', async () => {
     renderLoginWithContext();
     
@@ -63,33 +51,6 @@ describe('Login Component', () => {
     expect(passwordInput.value).toBe('password123');
   });
 
- /* test('toggles password visibility when show/hide button is clicked', async () => {
-    renderLoginWithContext();
-    
-    const passwordInput = screen.getByLabelText(/Contraseña/i);
-    const toggleButton = screen.getByText('Mostrar');
-    
-    expect(passwordInput).toHaveAttribute('type', 'password');
-    
-    await userEvent.click(toggleButton);
-    expect(passwordInput).toHaveAttribute('type', 'text');
-    expect(screen.getByText('Ocultar')).toBeInTheDocument();
-    
-    await userEvent.click(screen.getByText('Ocultar'));
-    expect(passwordInput).toHaveAttribute('type', 'password');
-    expect(screen.getByText('Mostrar')).toBeInTheDocument();
-  });*/
-
-  /*test('toggles remember me checkbox when clicked', async () => {
-    renderLoginWithContext();
-    
-    const rememberMeCheckbox = screen.getByLabelText(/Recordarme/i);
-    
-    
-    await userEvent.click(rememberMeCheckbox);
-    expect(rememberMeCheckbox).toBeChecked();
-    
-  });*/
 
   test('calls login function with form data when form is submitted', async () => {
     renderLoginWithContext();

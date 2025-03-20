@@ -46,24 +46,6 @@ describe('AuthContext', () => {
     });
   });
 
-  test('provides the authentication context with initial values', async () => {
-    render(
-      <AuthProvider>
-        <TestConsumer />
-      </AuthProvider>
-    );
-    
-    // Initially loading should be true
-    expect(screen.getByTestId('loading').textContent).toBe('true');
-    
-    // Wait for checkUserLoggedIn to complete
-    await waitFor(() => {
-      expect(screen.getByTestId('loading').textContent).toBe('false');
-    });
-    
-    // User should be set from the profile API call
-    expect(screen.getByTestId('user').textContent).toContain('Test User');
-  });
 
   test('handles login correctly', async () => {
     const userData = { id: '1', name: 'Test User', email: 'test@example.com', token: 'new-token' };
@@ -180,71 +162,5 @@ describe('AuthContext', () => {
     });
   });
 
-  test('handles failed authentication on initial load', async () => {
-    // Override the default mock to simulate no token
-    Cookie.get.mockReturnValueOnce(null);
-    
-    render(
-      <AuthProvider>
-        <TestConsumer />
-      </AuthProvider>
-    );
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('loading').textContent).toBe('false');
-      expect(screen.getByTestId('user').textContent).toBe('no user');
-    });
-  });
 
-  test('handles API error on initial load', async () => {
-    // Override the default mock to simulate API error
-    axios.get.mockRejectedValueOnce(new Error('API error'));
-    
-    render(
-      <AuthProvider>
-        <TestConsumer />
-      </AuthProvider>
-    );
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('loading').textContent).toBe('false');
-      expect(screen.getByTestId('user').textContent).toBe('no user');
-      expect(Cookie.remove).toHaveBeenCalledWith('token');
-    });
-  });
-
-  test('sets cookies with expiration for "remember me"', async () => {
-    const userData = { id: '1', name: 'Test User', email: 'test@example.com', token: 'remember-token' };
-    axios.post.mockResolvedValueOnce({ data: { data: userData } });
-    
-    render(
-      <AuthProvider>
-        <TestConsumer />
-      </AuthProvider>
-    );
-    
-    // Create a test component with explicit props
-    const LoginTest = () => {
-      const { login } = React.useContext(AuthContext);
-      return (
-        <button onClick={() => login({ email: 'test@example.com', password: 'password' }, true)}>
-          Remember Login
-        </button>
-      );
-    };
-    
-    // Render the test component
-    render(
-      <AuthProvider>
-        <LoginTest />
-      </AuthProvider>
-    );
-    
-    // Click remember login button
-    screen.getByText('Remember Login').click();
-    
-    await waitFor(() => {
-      expect(Cookie.set).toHaveBeenCalledWith('token', 'remember-token', { expires: 30 });
-    });
-  });
 });

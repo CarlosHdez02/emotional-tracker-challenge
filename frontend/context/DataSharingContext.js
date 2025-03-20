@@ -17,7 +17,7 @@ export const DataSharingProvider = ({ children }) => {
     try {
         const response = await dataSharing.getAssignedTherapist();
         if (response && response.therapist) {
-            setAssignedTherapist(response.therapist); // ✅ Set only the therapist data
+            setAssignedTherapist(response.therapist);
         } else {
             setAssignedTherapist(null);
         }
@@ -36,7 +36,7 @@ export const DataSharingProvider = ({ children }) => {
     try {
       const result = await dataSharing.assignTherapistToUser(email);
       if (result) {
-        await getAssignedTherapist(); // Refresh assigned therapist data
+        await getAssignedTherapist(); 
         return true;
       }
       return false;

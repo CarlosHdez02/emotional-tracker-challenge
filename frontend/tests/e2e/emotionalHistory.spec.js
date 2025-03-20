@@ -7,48 +7,44 @@ test.describe('Emotion History Component', () => {
     });
 
     test('should load the Emotion History component', async ({ page }) => {
-        const title = await page.locator('h2'); 
+        const title = page.locator('h2'); 
         await expect(title).toHaveText('Historial de Emociones');
     });
 
     test('should display a loading spinner while fetching emotions', async ({ page }) => {
-        await page.waitForSelector('.LoadingSpinner', { state: 'visible' });
-        const loadingText = await page.locator('.LoadingSpinner').textContent();
-        expect(loadingText).toBe('Cargando...');
+        await expect(page.locator('.LoadingSpinner')).toBeVisible();
     });
 
     test('should show empty state when no emotions are recorded', async ({ page }) => {
         await page.waitForSelector('.EmptyState');
-        const emptyText = await page.locator('.EmptyState').textContent();
-        expect(emptyText).toContain('No hay emociones registradas aún');
+        const emptyText = page.locator('.EmptyState');
+        await expect(emptyText).toHaveText('No hay emociones registradas aún');
     });
 
     test('should show error message and retry button if fetching fails', async ({ page }) => {
-   
-        await page.route('**/api/emotions', route => route.abort()); 
-        
-        await page.reload(); 
+        await page.route('**/api/emotions', route => route.abort());
+
+        await page.reload();
         await page.waitForSelector('.ErrorMessage');
 
-        const errorText = await page.locator('.ErrorMessage').textContent();
-        expect(errorText).toContain('Hubo un problema al cargar las emociones');
+        const errorText = page.locator('.ErrorMessage');
+        await expect(errorText).toHaveText('Hubo un problema al cargar las emociones');
 
-        const retryButton = await page.locator('.RetryButton');
+        const retryButton = page.locator('.RetryButton');
         await expect(retryButton).toBeVisible();
     });
 
     test('should display recorded emotions correctly', async ({ page }) => {
         await page.waitForSelector('.EmotionList');
-        
-        const emotions = await page.locator('.EmotionCard');
-        expect(await emotions.count()).toBeGreaterThan(0); 
+        const emotions = page.locator('.EmotionCard');
+        await expect(emotions).toHaveCountGreaterThan(0);
     });
 
     test('should verify emotion triggers and activities are displayed', async ({ page }) => {
         await page.waitForSelector('.EmotionList');
-        
-        const trigger = await page.locator('.trigger').first();
-        const activity = await page.locator('.activity').first();
+
+        const trigger = page.locator('.trigger').first();
+        const activity = page.locator('.activity').first();
 
         await expect(trigger).toBeVisible();
         await expect(activity).toBeVisible();
@@ -57,11 +53,36 @@ test.describe('Emotion History Component', () => {
     test('should check intensity and notes for an emotion', async ({ page }) => {
         await page.waitForSelector('.EmotionList');
 
-        const intensity = await page.locator('.EmotionIntensity').first().textContent();
-        expect(intensity).toContain('Intensidad');
+        const intensity = page.locator('.EmotionIntensity').first();
+        await expect(intensity).toContainText('Intensidad');
 
-        const notes = await page.locator('.EmotionNotes').first();
+        const notes = page.locator('.EmotionNotes').first();
         await expect(notes).toBeVisible();
     });
 
+    test('should retry loading when clicking the retry button', async ({ page }) => {
+        await page.route('**/api/emotions', route => route.abort());
+
+        await page.reload();
+        await page.waitForSelector('.RetryButton');
+
+        const retryButton = page.locator('.RetryButton');
+        await retryButton.click();
+
+        await expect(page.locator('.LoadingSpinner')).toBeVisible();
+    });
+
+    test('should delete an emotion and update the UI', async ({ page }) => {
+        await page.waitForSelector('.EmotionList');
+
+        const deleteButton = page.locator('.DeleteButton').first();
+        await expect(deleteButton).toBeVisible();
+        await deleteButton.click();
+
+        await page.waitForSelector('.ConfirmationModal');
+        const confirmButton = page.locator('.ConfirmationModal button', { hasText: 'Eliminar' });
+        await confirmButton.click();
+
+        await expect(page.locator('.EmotionCard')).toHaveCountLessThan(2);
+    });
 });
