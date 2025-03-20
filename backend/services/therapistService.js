@@ -58,7 +58,7 @@ export default class TherapistService {
         throw new NotFoundError("User not found");
       }
       
-      // Automatically create data sharing record
+
       await this.createDataSharing(userId, therapist._id);
       
       return updatedUser.sanitize();
@@ -81,7 +81,7 @@ export default class TherapistService {
         throw new NotFoundError("User not found");
       }
       
-      // Revoke any active data sharing
+  
       await TherapistDataSharing.updateMany(
         { userId: userId, status: 'active' },
         { status: 'revoked' }
@@ -114,7 +114,7 @@ export default class TherapistService {
         };
       }
     } else {
-      // Create new data sharing record
+
       dataSharing = new TherapistDataSharing({
         userId: userId,
         therapistId: therapistId,
@@ -193,7 +193,7 @@ export default class TherapistService {
 
       dataSharing.sharedData.push(sharedDataEntry);
       
-      // Make sure we only keep the 5 most recent entries
+     
       if (dataSharing.sharedData.length > 5) {
         dataSharing.sharedData = dataSharing.sharedData.slice(-5);
       }

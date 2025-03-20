@@ -19,6 +19,7 @@ export default class EmotionRoutes {
     this.router.get("/user/:userId", protect, this.emotionController.getUserEmotions.bind(this.emotionController));
     this.router.get("/emotion/:emotionId", protect, this.emotionController.getEmotionById.bind(this.emotionController));
     this.router.put("/:emotionId", protect, this.emotionController.updateEmotion.bind(this.emotionController));
+    this.router.delete('/:emotionId',protect, this.emotionController.deleteEmotion.bind(this.emotionController))
   }
 
   getRouter() {

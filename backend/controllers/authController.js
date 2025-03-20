@@ -49,10 +49,10 @@ export default class AuthController {
         throw new ValidationError('Token is required');
       }
       
-      // Verify the token
+    
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Find user by ID from token
+      
       const user = await User.findById(decoded.id).select('-password');
       
       if (!user) {

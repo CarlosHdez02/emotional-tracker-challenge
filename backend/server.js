@@ -8,6 +8,7 @@ import UserRoutes from './routes/userRoutes.js';
 import EmotionRoutes from './routes/emotionRoutes.js';
 import ReminderRoute from './routes/reminderRoutes.js';
 import TherapistRoute from './routes/therapistRoutes.js';
+import IdentifyPatternRoute from './routes/identifyPatternRoute.js';
 
 dotenv.config();
 
@@ -26,12 +27,14 @@ const userRoutesInstance = new UserRoutes();
 const emotionRoutesInstance = new EmotionRoutes();
 const reminderRoutesInstance = new ReminderRoute();
 const therapistRoutesInstance = new TherapistRoute()
+const identifyPatternsRoutesInstance = new IdentifyPatternRoute()
 
 // Routes
 app.use('/api/users', userRoutesInstance.getRouter());
 app.use('/api/emotions', emotionRoutesInstance.getRouter());
 app.use('/api/reminders', reminderRoutesInstance.getRouter());
 app.use('/api/therapist', therapistRoutesInstance.getRouter())
+app.use('/api/patterns', identifyPatternsRoutesInstance.getRouter()) //  here will be the identifyPattenrs route
 
 // Unprotected test route
 app.get('/api/status', (req, res) => {

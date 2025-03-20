@@ -47,9 +47,7 @@ userSchema.methods.sanitize = function() {
   // Remove sensitive fields
   delete userObject.password;
   
-  // You can remove additional fields if needed
-  // delete userObject.therapistId;
-  // delete userObject.__v;
+
   
   return userObject;
 };

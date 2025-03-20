@@ -48,7 +48,7 @@ export default class TherapistController {
       // Get user ID from authenticated user
       const userId = req.user._id;
       
-      // Call the service method
+    
       const result = await this.therapistService.shareEmotionsWithTherapist(userId);
       
       res.status(200).json(result);

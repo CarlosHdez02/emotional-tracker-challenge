@@ -22,7 +22,7 @@ export const protect = async (req, res, next) => {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
         
-        // Use projection for efficiency
+       
         const user = await User.findById(decoded.id).select('-password');
         
         if (!user) {

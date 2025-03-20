@@ -90,7 +90,7 @@ const therapistDataSharingSchema = new mongoose.Schema({
     type: [accessLogSchema],
     default: []
   },
-  // Add sharedData field to store historical emotion data
+
   sharedData: {
     type: [sharedDataEntrySchema],
     default: []

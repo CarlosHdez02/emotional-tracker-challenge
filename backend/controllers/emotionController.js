@@ -46,6 +46,31 @@ export default class EmotionController {
     }
   }
 
+  async deleteEmotion(req, res, next) {
+    try {
+      const emotionId = req.params.emotionId;
+      
+      const emotion = await this.emotionService.getEmotionById(emotionId);
+      
+      if (!emotion) {
+        return res.status(404).json({
+          success: false,
+          message: 'Emotion not found'
+        });
+      }
+      
+      // Delete the emotion
+      await this.emotionService.deleteEmotion(emotionId);
+      
+      res.status(204).json({
+        success: true,
+        message: 'Emotion deleted successfully'
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async createEmotion(req, res, next) {
     try {
       const { error, value } = emotionCreateSchema.validate(req.body, {

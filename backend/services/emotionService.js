@@ -32,7 +32,7 @@ export default class EmotionService {
     } catch (err) {
       console.error("Error creating emotion:", err);
       
-      // Handle specific MongoDB/Mongoose errors
+  
       if (err.name === 'ValidationError') {
         throw new ValidationError(err.message);
       }
@@ -56,6 +56,27 @@ export default class EmotionService {
       throw err;
     }
   }
+
+  async deleteEmotion(emotionId) {
+    try {
+      const deletedEmotion = await Emotion.findByIdAndDelete(emotionId);
+      
+      if (!deletedEmotion) {
+        throw new NotFoundError('Emotion not found');
+      }
+      
+      return deletedEmotion;
+    } catch (err) {
+      console.error("Error deleting emotion:", err);
+      
+      if (err.name === 'CastError') {
+        throw new ValidationError('Invalid emotion ID format');
+      }
+      
+      throw err;
+    }
+  }
+
 
   async getEmotionSummary(userId) {
     try {
